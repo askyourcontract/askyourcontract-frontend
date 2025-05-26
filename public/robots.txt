@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://askyourcontractai.com
+
+# Sitemaps
+Sitemap: https://askyourcontractai.com/sitemap.xml
