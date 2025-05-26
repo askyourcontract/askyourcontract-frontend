@@ -144,8 +144,18 @@ export default function Home({ session }: { session: Session | null }) {
       </main>
 
       {/* Footer */}
-      <footer className="text-center text-sm text-gray-500 py-4">
-        &copy; {new Date().getFullYear()} AskYourContract.ai • All rights reserved.
+      <footer className="text-center text-sm text-gray-500 py-6">
+        <p>
+          &copy; {new Date().getFullYear()} AskYourContract.ai • All rights reserved.
+        </p>
+        <div className="mt-2 space-x-4">
+          <a href="/privacy-policy" className="underline hover:text-blue-600">
+            Privacy Policy
+          </a>
+          <a href="/terms-of-service" className="underline hover:text-blue-600">
+            Terms of Service
+          </a>
+        </div>
       </footer>
     </div>
   )
