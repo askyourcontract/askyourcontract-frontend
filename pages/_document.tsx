@@ -4,28 +4,55 @@ export default function Document() {
   return (
     <Html lang="en">
       <Head>
-        {/* Primary Meta Tags */}
+        {/* Basic Meta Tags */}
         <meta charSet="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="title" content="AskYourContract.ai — AI Legal Document Assistant" />
-        <meta name="description" content="Upload and understand contracts instantly using AI. Summarized, simplified, and key points extracted automatically." />
-        <meta name="keywords" content="legal AI, contract analysis, summarize contracts, AskYourContract, understand legal documents, AI assistant" />
+        <meta name="description" content="AskYourContract.ai helps you understand legal documents instantly with AI. Upload contracts, get summaries, and insights in seconds." />
+        <meta name="keywords" content="legal AI, contract analysis, document summarization, AI lawyer, Supabase, OpenAI, AskYourContract" />
         <meta name="author" content="AskYourContract.ai" />
-        <link rel="icon" href="/favicon.ico" />
 
-        {/* Open Graph / Facebook */}
+        {/* Open Graph Meta Tags for social sharing */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://askyourcontractai.com/" />
-        <meta property="og:title" content="AskYourContract.ai — AI Legal Document Assistant" />
-        <meta property="og:description" content="Upload and understand contracts instantly using AI. Get summaries, key points, and plain-language explanations." />
+        <meta property="og:title" content="AskYourContract.ai - Understand Contracts with AI" />
+        <meta property="og:description" content="Upload your legal documents and get instant AI-powered summaries, explanations, and clause highlights." />
         <meta property="og:image" content="https://askyourcontractai.com/preview-ai-legal-assistant.png" />
 
-        {/* Twitter */}
+        {/* Twitter Card Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:url" content="https://askyourcontractai.com/" />
-        <meta name="twitter:title" content="AskYourContract.ai — AI Legal Document Assistant" />
-        <meta name="twitter:description" content="Upload and understand contracts instantly using AI. Get summaries, key points, and plain-language explanations." />
+        <meta name="twitter:title" content="AskYourContract.ai - Understand Contracts with AI" />
+        <meta name="twitter:description" content="Upload legal documents and let AI summarize, explain, and highlight key clauses." />
         <meta name="twitter:image" content="https://askyourcontractai.com/preview-ai-legal-assistant.png" />
+
+        {/* Structured Data JSON-LD */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "AskYourContract.ai",
+              url: "https://askyourcontractai.com",
+              description: "AI-powered tool that helps you understand legal documents instantly.",
+              sameAs: [],
+              potentialAction: {
+                "@type": "SearchAction",
+                target: "https://askyourcontractai.com/?query={search_term_string}",
+                "query-input": "required name=search_term_string",
+              },
+              publisher: {
+                "@type": "Organization",
+                name: "AskYourContract.ai",
+                logo: {
+                  "@type": "ImageObject",
+                  url: "https://askyourcontractai.com/preview-ai-legal-assistant.png",
+                },
+              },
+            }),
+          }}
+        />
+        {/* Favicon */}
+        <link rel="icon" href="/favicon.ico" />
       </Head>
       <body>
         <Main />
