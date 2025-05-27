@@ -1,11 +1,9 @@
 import { useEffect } from 'react'
+import type { AppProps } from 'next/app'
 import Head from 'next/head'
-import { useRouter } from 'next/router'
 import '../styles/globals.css'
 
-export default function MyApp({ Component, pageProps }) {
-  const router = useRouter()
-
+export default function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => {
     const handleRouteChange = (url: string) => {
       if (typeof window !== 'undefined' && (window as any).gtag) {
@@ -14,23 +12,32 @@ export default function MyApp({ Component, pageProps }) {
         })
       }
     }
-    router.events.on('routeChangeComplete', handleRouteChange)
+
+    import('next/router').then(({ Router }) => {
+      Router.events.on('routeChangeComplete', handleRouteChange)
+    })
+
     return () => {
-      router.events.off('routeChangeComplete', handleRouteChange)
+      import('next/router').then(({ Router }) => {
+        Router.events.off('routeChangeComplete', handleRouteChange)
+      })
     }
-  }, [router.events])
+  }, [])
 
   return (
     <>
       <Head>
-        {/* Google Analytics Init */}
+        <title>AskYourContract.ai</title>
+        {/* Google Analytics Initialization */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', 'G-LR373JLL8E');
+              gtag('config', 'G-LR373JLL8E', {
+                page_path: window.location.pathname,
+              });
             `,
           }}
         />
