@@ -43,6 +43,19 @@ export default function FileUpload() {
 
       if (uploadError) throw new Error(uploadError.message)
 
+      // Google Analytics: file upload event
+      if (typeof window !== 'undefined' && typeof (window as any).gtag !== 'undefined') {
+        (window as any).gtag('event', 'file_upload', {
+          file_type: fileExt,
+          file_name: file.name,
+        })
+      }
+
+      // Google Analytics: analysis start event
+      if (typeof window !== 'undefined' && typeof (window as any).gtag !== 'undefined') {
+        (window as any).gtag('event', 'analysis_start')
+      }
+
       const res = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

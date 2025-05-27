@@ -28,8 +28,14 @@ export default function Home({ session }: { session: Session | null }) {
     return () => subscription.unsubscribe()
   }, [])
 
+  // --- Google Analytics Event Tracking ---
   const handleGoogleSignIn = async () => {
     await supabase.auth.signInWithOAuth({ provider: 'google' })
+    if (typeof window !== 'undefined' && typeof (window as any).gtag !== 'undefined') {
+      (window as any).gtag('event', 'login', {
+        method: 'Google',
+      })
+    }
   }
 
   const handleAuth = async () => {
@@ -40,18 +46,21 @@ export default function Home({ session }: { session: Session | null }) {
       ? await supabase.auth.signUp({ email, password })
       : await supabase.auth.signInWithPassword({ email, password })
 
+    if (typeof window !== 'undefined' && typeof (window as any).gtag !== 'undefined') {
+      (window as any).gtag('event', isSignUp ? 'sign_up' : 'login', {
+        method: 'Email',
+      })
+    }
+
     if (error) {
       setMessage(error.message)
     } else {
-      setMessage(
-        isSignUp
-          ? 'Signup successful! Check your email to confirm.'
-          : 'Login successful!'
-      )
+      setMessage(isSignUp ? 'Signup successful! Check your email to confirm.' : 'Login successful!')
     }
 
     setLoading(false)
   }
+  // --- End Google Analytics Event Tracking ---
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
