@@ -10,7 +10,7 @@ export default function Document() {
         <meta name="keywords" content="legal AI, contract analysis, document summarization, AI lawyer, Supabase, OpenAI, AskYourContract" />
         <meta name="author" content="AskYourContract.ai" />
 
-        {/* Open Graph Meta Tags for social sharing */}
+        {/* Open Graph Meta Tags */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://askyourcontractai.com/" />
         <meta property="og:title" content="AskYourContract.ai - Understand Contracts with AI" />
@@ -50,6 +50,12 @@ export default function Document() {
               },
             }),
           }}
+        />
+
+        {/* Google Analytics Loader */}
+        <script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-LR373JLL8E"
         />
         {/* Favicon */}
         <link rel="icon" href="/favicon.ico" />
