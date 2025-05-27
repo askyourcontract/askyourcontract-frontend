@@ -1,11 +1,12 @@
 import { useEffect } from 'react'
-import type { AppProps } from 'next/app'
 import Head from 'next/head'
+import { useRouter } from 'next/router'
 import '../styles/globals.css'
 
-export default function MyApp({ Component, pageProps }: AppProps) {
+export default function MyApp({ Component, pageProps }) {
+  const router = useRouter()
+
   useEffect(() => {
-    // Google Analytics setup for client-side route changes
     const handleRouteChange = (url: string) => {
       if (typeof window !== 'undefined' && (window as any).gtag) {
         (window as any).gtag('config', 'G-LR373JLL8E', {
@@ -13,28 +14,16 @@ export default function MyApp({ Component, pageProps }: AppProps) {
         })
       }
     }
-
-    // Next.js uses Router events, not window events
-    // Import Router dynamically to avoid SSR issues
-    import('next/router').then(({ Router }) => {
-      Router.events.on('routeChangeComplete', handleRouteChange)
-    })
-
+    router.events.on('routeChangeComplete', handleRouteChange)
     return () => {
-      import('next/router').then(({ Router }) => {
-        Router.events.off('routeChangeComplete', handleRouteChange)
-      })
+      router.events.off('routeChangeComplete', handleRouteChange)
     }
-  }, [])
+  }, [router.events])
 
   return (
     <>
       <Head>
-        {/* Google Analytics Script */}
-        <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-LR373JLL8E"
-        ></script>
+        {/* Google Analytics Init */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
