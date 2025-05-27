@@ -28,7 +28,7 @@ export default function Home({ session }: { session: Session | null }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  // --- Google Analytics Event Tracking ---
+  // Google Analytics event for Google sign-in
   const handleGoogleSignIn = async () => {
     await supabase.auth.signInWithOAuth({ provider: 'google' })
     if (typeof window !== 'undefined' && typeof (window as any).gtag !== 'undefined') {
@@ -38,6 +38,7 @@ export default function Home({ session }: { session: Session | null }) {
     }
   }
 
+  // Google Analytics event for email sign-in/sign-up
   const handleAuth = async () => {
     setLoading(true)
     setMessage('')
@@ -55,12 +56,15 @@ export default function Home({ session }: { session: Session | null }) {
     if (error) {
       setMessage(error.message)
     } else {
-      setMessage(isSignUp ? 'Signup successful! Check your email to confirm.' : 'Login successful!')
+      setMessage(
+        isSignUp
+          ? 'Signup successful! Check your email to confirm.'
+          : 'Login successful!'
+      )
     }
 
     setLoading(false)
   }
-  // --- End Google Analytics Event Tracking ---
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -174,7 +178,11 @@ export default function Home({ session }: { session: Session | null }) {
                 </button>
               </div>
 
-              {message && <p className="text-sm text-red-600" role="status">{message}</p>}
+              {message && (
+                <p className="text-sm text-red-600" role="status">
+                  {message}
+                </p>
+              )}
             </div>
           ) : (
             <div className="w-full max-w-2xl px-4">
