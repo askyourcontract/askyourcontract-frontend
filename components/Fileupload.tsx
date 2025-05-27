@@ -1,4 +1,3 @@
-// components/FileUpload.tsx
 'use client'
 
 import { useState } from 'react'
@@ -43,17 +42,13 @@ export default function FileUpload() {
 
       if (uploadError) throw new Error(uploadError.message)
 
-      // Google Analytics: file upload event
-      if (typeof window !== 'undefined' && typeof (window as any).gtag !== 'undefined') {
+      // Trigger Google Analytics event for file upload
+      if (typeof window !== 'undefined' && (window as any).gtag) {
         (window as any).gtag('event', 'file_upload', {
-          file_type: fileExt,
-          file_name: file.name,
+          event_category: 'Documents',
+          event_label: file.name,
+          value: file.size,
         })
-      }
-
-      // Google Analytics: analysis start event
-      if (typeof window !== 'undefined' && typeof (window as any).gtag !== 'undefined') {
-        (window as any).gtag('event', 'analysis_start')
       }
 
       const res = await fetch('/api/analyze', {
@@ -66,6 +61,15 @@ export default function FileUpload() {
       if (!res.ok) throw new Error(data.error || 'Analysis failed')
 
       setAnalysis(data)
+
+      // Trigger Google Analytics event for AI result
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'ai_analysis_complete', {
+          event_category: 'Analysis',
+          event_label: file.name,
+        })
+      }
+
     } catch (err: any) {
       setError(err.message || 'Something went wrong')
     } finally {
