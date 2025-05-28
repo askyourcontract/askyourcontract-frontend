@@ -67,7 +67,7 @@ export default function Home() {
           className="absolute top-10 right-20 opacity-10 hidden md:block"
         />
         <Image
-          src="/Scales.svg"
+          src="/scales.svg"
           alt="Scales BG"
           width={150}
           height={150}
@@ -88,13 +88,13 @@ export default function Home() {
             />
             <span className="text-xl font-bold">AskYourContract.ai</span>
           </div>
-          <div className="text-sm text-slate-300 flex items-center gap-4">
+          <div className="text-sm text-slate-300 flex flex-col items-end gap-2 sm:flex-row sm:items-center sm:gap-4 text-right">
             {session ? (
               <>
-                <span className="text-slate-400">{session.user.email}</span>
+                <span className="text-slate-400 text-xs sm:text-sm">{session.user?.email || 'Signed in'}</span>
                 <button
                   onClick={handleSignOut}
-                  className="bg-slate-700 px-3 py-1 rounded hover:bg-slate-600"
+                  className="bg-slate-700 px-3 py-1 rounded hover:bg-slate-600 text-xs sm:text-sm"
                 >
                   Sign out
                 </button>
@@ -243,7 +243,7 @@ export default function Home() {
               >
                 <div className="flex items-center mb-4">
                   <Image
-                    src="/Scales.svg"
+                    src="/scales.svg"
                     alt="AI Contract Building"
                     width={24}
                     height={24}
