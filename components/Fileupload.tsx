@@ -9,15 +9,17 @@ type AnalysisResult = {
   explanation: string
 }
 
-export default function FileUpload() {
+type Props = {
+  onResults: (result: AnalysisResult) => void
+}
+
+export default function FileUpload({ onResults }: Props) {
   const [file, setFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
-  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null)
   const [error, setError] = useState<string>('')
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFile(e.target.files?.[0] || null)
-    setAnalysis(null)
     setError('')
   }
 
@@ -29,7 +31,6 @@ export default function FileUpload() {
 
     setUploading(true)
     setError('')
-    setAnalysis(null)
 
     try {
       const fileExt = file.name.split('.').pop()
@@ -42,7 +43,7 @@ export default function FileUpload() {
 
       if (uploadError) throw new Error(uploadError.message)
 
-      // Trigger Google Analytics event for file upload
+      // Google Analytics event for upload
       if (typeof window !== 'undefined' && (window as any).gtag) {
         (window as any).gtag('event', 'file_upload', {
           event_category: 'Documents',
@@ -60,9 +61,9 @@ export default function FileUpload() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Analysis failed')
 
-      setAnalysis(data)
+      onResults(data)
 
-      // Trigger Google Analytics event for AI result
+      // Google Analytics event for result
       if (typeof window !== 'undefined' && (window as any).gtag) {
         (window as any).gtag('event', 'ai_analysis_complete', {
           event_category: 'Analysis',
@@ -81,9 +82,7 @@ export default function FileUpload() {
     <div className="bg-white max-w-2xl mx-auto w-full p-6 sm:p-8 rounded-xl shadow-md mt-6 space-y-6">
       <div>
         <h2 className="text-xl font-semibold text-gray-800 mb-2">Upload your legal document</h2>
-        <p className="text-gray-500 text-sm">
-          Supported formats: PDF, DOCX, JPG/PNG
-        </p>
+        <p className="text-gray-500 text-sm">Supported formats: PDF, DOCX, JPG/PNG</p>
       </div>
 
       <input
@@ -112,12 +111,12 @@ export default function FileUpload() {
               r="10"
               stroke="currentColor"
               strokeWidth="4"
-            ></circle>
+            />
             <path
               className="opacity-75"
               fill="currentColor"
               d="M4 12a8 8 0 018-8v8H4z"
-            ></path>
+            />
           </svg>
         ) : null}
         {uploading ? 'Analyzing...' : 'Upload & Analyze'}
@@ -126,29 +125,6 @@ export default function FileUpload() {
       {error && (
         <div className="bg-red-100 text-red-700 text-sm px-4 py-2 rounded">
           {error}
-        </div>
-      )}
-
-      {analysis && (
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800">📄 Summary</h3>
-            <p className="text-gray-700 mt-1">{analysis.summary}</p>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800">📌 Important Clauses</h3>
-            <ul className="list-disc pl-5 text-gray-700 mt-1 space-y-1">
-              {analysis.clauses.map((clause, i) => (
-                <li key={i}>{clause}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800">💡 Simple Explanation</h3>
-            <p className="text-gray-700 mt-1">{analysis.explanation}</p>
-          </div>
         </div>
       )}
     </div>

@@ -1,73 +1,43 @@
 'use client'
 
 import Head from 'next/head'
-import { useEffect, useState } from 'react'
+import Image from 'next/image'
+import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import FileUpload from '../components/Fileupload'
 import { Session } from '@supabase/supabase-js'
+import FileUpload from '../components/Fileupload'
 
-export default function Home({ session }: { session: Session | null }) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [isSignUp, setIsSignUp] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState('')
-  const [currentSession, setCurrentSession] = useState<Session | null>(session)
+export default function Home() {
+  const [session, setSession] = useState<Session | null>(null)
+  const [summary, setSummary] = useState('')
+  const [importantClauses, setImportantClauses] = useState<string[]>([])
+  const [simpleExplanation, setSimpleExplanation] = useState('')
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setCurrentSession(session)
+      setSession(session)
     })
-
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setCurrentSession(session)
+      setSession(session)
     })
-
     return () => subscription.unsubscribe()
   }, [])
 
-  // Google Analytics event for Google sign-in
-  const handleGoogleSignIn = async () => {
-    await supabase.auth.signInWithOAuth({ provider: 'google' })
-    if (typeof window !== 'undefined' && typeof (window as any).gtag !== 'undefined') {
-      (window as any).gtag('event', 'login', {
-        method: 'Google',
-      })
-    }
-  }
-
-  // Google Analytics event for email sign-in/sign-up
-  const handleAuth = async () => {
-    setLoading(true)
-    setMessage('')
-
-    const { error } = isSignUp
-      ? await supabase.auth.signUp({ email, password })
-      : await supabase.auth.signInWithPassword({ email, password })
-
-    if (typeof window !== 'undefined' && typeof (window as any).gtag !== 'undefined') {
-      (window as any).gtag('event', isSignUp ? 'sign_up' : 'login', {
-        method: 'Email',
-      })
-    }
-
-    if (error) {
-      setMessage(error.message)
-    } else {
-      setMessage(
-        isSignUp
-          ? 'Signup successful! Check your email to confirm.'
-          : 'Login successful!'
-      )
-    }
-
-    setLoading(false)
+  const handleResults = (results: {
+    summary: string
+    clauses: string[]
+    explanation: string
+  }) => {
+    setSummary(results.summary)
+    setImportantClauses(results.clauses)
+    setSimpleExplanation(results.explanation)
   }
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
+    setSession(null)
   }
 
   return (
@@ -76,150 +46,216 @@ export default function Home({ session }: { session: Session | null }) {
         <title>AskYourContract.ai - Understand Contracts with AI</title>
         <meta
           name="description"
-          content="Upload your legal documents and get instant AI-powered summaries, explanations, and clause highlights."
-        />
-        <meta name="keywords" content="AI contract analysis, legal assistant, contract summaries, legal AI" />
-        <meta name="author" content="AskYourContract.ai" />
-        <meta property="og:url" content="https://askyourcontractai.com" />
-        <meta property="og:type" content="website" />
-        <meta property="og:title" content="AskYourContract.ai - Understand Contracts with AI" />
-        <meta
-          property="og:description"
-          content="Upload your legal documents and get instant AI-powered summaries, explanations, and clause highlights."
-        />
-        <meta property="og:image" content="https://askyourcontractai.com/preview-ai-legal-assistant.png" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="AskYourContract.ai - Understand Contracts with AI" />
-        <meta
-          name="twitter:description"
-          content="Upload your legal documents and get instant AI-powered summaries, explanations, and clause highlights."
-        />
-        <meta name="twitter:image" content="https://askyourcontractai.com/preview-ai-legal-assistant.png" />
-        <link rel="canonical" href="https://askyourcontractai.com" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'WebApplication',
-              name: 'AskYourContract.ai',
-              url: 'https://askyourcontractai.com',
-              description:
-                'AI-powered legal assistant that summarizes, explains, and highlights clauses in legal documents.',
-              applicationCategory: 'LegalApplication',
-              operatingSystem: 'All',
-            }),
-          }}
+          content="Upload and analyze legal contracts with AI"
         />
       </Head>
 
-      <div className="min-h-screen flex flex-col justify-between bg-gray-100">
-        <header className="text-center p-6 bg-white shadow">
-          <h1 className="text-3xl font-bold text-blue-700">AskYourContract.ai</h1>
-          <p className="text-gray-600 mt-1">
-            Upload and understand legal documents instantly with AI
-          </p>
-        </header>
+      <div className="min-h-screen bg-gradient-to-br from-[#0f172a] to-[#1e293b] text-white px-4 relative overflow-hidden">
+        {/* Background SVGs */}
+        <Image
+          src="/document.svg"
+          alt="Document BG"
+          width={150}
+          height={150}
+          className="absolute bottom-10 left-10 opacity-10 hidden md:block"
+        />
+        <Image
+          src="/magnifier.svg"
+          alt="Magnifier BG"
+          width={150}
+          height={150}
+          className="absolute top-10 right-20 opacity-10 hidden md:block"
+        />
+        <Image
+          src="/Scales.svg"
+          alt="Scales BG"
+          width={150}
+          height={150}
+          className="absolute bottom-0 right-0 opacity-10 hidden md:block"
+        />
 
-        <main className="flex-grow flex items-center justify-center px-4 py-10">
-          {!currentSession ? (
-            <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md text-center space-y-6">
-              <button
-                type="button"
-                onClick={handleGoogleSignIn}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition"
-              >
-                Sign in with Google
-              </button>
-
-              <div className="flex items-center justify-center space-x-2">
-                <span className="h-px w-10 bg-gray-300"></span>
-                <span className="text-sm text-gray-500">or</span>
-                <span className="h-px w-10 bg-gray-300"></span>
-              </div>
-
-              <input
-                type="email"
-                name="email"
-                autoComplete="username"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded"
-              />
-              <input
-                type="password"
-                name="password"
-                autoComplete="current-password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded"
-              />
-
-              <div className="flex space-x-2">
+        {/* Header */}
+        <header className="flex justify-between items-center py-6 max-w-7xl mx-auto">
+          <div
+            className="flex items-center space-x-3 cursor-pointer"
+            onClick={() => window.location.href = '/'}
+          >
+            <Image
+              src="/logo.png"
+              alt="AskYourContract Logo"
+              width={40}
+              height={40}
+            />
+            <span className="text-xl font-bold">AskYourContract.ai</span>
+          </div>
+          <div className="text-sm text-slate-300 flex items-center gap-4">
+            {session ? (
+              <>
+                <span className="text-slate-400">{session.user.email}</span>
                 <button
-                  type="button"
-                  onClick={handleAuth}
-                  disabled={loading}
-                  className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-                >
-                  {loading ? 'Processing...' : isSignUp ? 'Sign Up' : 'Login'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsSignUp(!isSignUp)
-                    setMessage('')
-                  }}
-                  className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-800 transition"
-                >
-                  {isSignUp ? 'Login' : 'Sign Up'}
-                </button>
-              </div>
-
-              {message && (
-                <p className="text-sm text-red-600" role="status">
-                  {message}
-                </p>
-              )}
-            </div>
-          ) : (
-            <div className="w-full max-w-2xl px-4">
-              <div className="mb-4 flex justify-between items-center">
-                <p className="text-gray-700 font-medium">
-                  Signed in as {currentSession.user.email}
-                </p>
-                <button
-                  type="button"
                   onClick={handleSignOut}
-                  className="text-sm text-red-600 hover:underline"
+                  className="bg-slate-700 px-3 py-1 rounded hover:bg-slate-600"
                 >
                   Sign out
                 </button>
-              </div>
-              <FileUpload />
-            </div>
-          )}
-        </main>
+              </>
+            ) : (
+              <a href="/signup" className="hover:text-white">
+                Sign up
+              </a>
+            )}
+          </div>
+        </header>
 
-        <footer className="text-center text-sm text-gray-500 py-4">
-          &copy; {new Date().getFullYear()} AskYourContract.ai • All rights reserved.
-          <br />
-          <a
-            href="/privacy-policy"
-            className="text-blue-600 hover:underline mx-2"
-          >
-            Privacy Policy
-          </a>
-          |
-          <a
-            href="/terms-of-service"
-            className="text-blue-600 hover:underline mx-2"
-          >
-            Terms of Service
-          </a>
-        </footer>
+        {/* Main Content */}
+        {!session ? (
+          <main className="flex flex-col items-center text-center mt-10 space-y-6">
+            <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight">
+              Welcome to <br /> AskYourContract.AI
+            </h1>
+            <p className="text-slate-300 max-w-xl">
+              Analyze your legal documents smartly with AI, detect red flags,
+              and get actionable insights.
+            </p>
+
+            {/* Sign-in Buttons */}
+            <div className="space-y-3 w-full max-w-xs">
+              <button
+                onClick={() =>
+                  supabase.auth.signInWithOAuth({ provider: 'google' })
+                }
+                className="flex items-center justify-center w-full py-2 bg-white text-black rounded shadow"
+              >
+                <Image
+                  src="/google-icon.svg"
+                  alt="Google"
+                  width={20}
+                  height={20}
+                  className="mr-2"
+                />
+                Sign in with Google
+              </button>
+              <button
+                onClick={() =>
+                  supabase.auth.signInWithOAuth({ provider: 'twitter' })
+                }
+                className="flex items-center justify-center w-full py-2 bg-blue-500 rounded shadow"
+              >
+                <Image
+                  src="/twitter-icon.svg"
+                  alt="Twitter"
+                  width={20}
+                  height={20}
+                  className="mr-2"
+                />
+                Sign in with Twitter
+              </button>
+              <button
+                onClick={() =>
+                  supabase.auth.signInWithOAuth({ provider: 'azure' })
+                }
+                className="flex items-center justify-center w-full py-2 bg-gray-800 rounded shadow"
+              >
+                <Image
+                  src="/microsoft-icon.svg"
+                  alt="Microsoft"
+                  width={20}
+                  height={20}
+                  className="mr-2"
+                />
+                Sign in with Microsoft
+              </button>
+            </div>
+            <p className="text-sm text-slate-400">
+              <a href="/signup" className="underline">
+                Sign up
+              </a>{' '}
+              |{' '}
+              <a href="/login" className="underline">
+                Log in
+              </a>
+            </p>
+          </main>
+        ) : (
+          <main className="max-w-7xl mx-auto mt-10">
+            {/* Upload Section */}
+            <section className="text-center mb-10">
+              <h2 className="text-4xl font-bold mb-4">Upload a Document</h2>
+              <p className="text-slate-300 mb-6">
+                Upload any legal document to receive instant analysis,
+                summaries, and red flag detection.
+              </p>
+              <FileUpload onResults={handleResults} />
+            </section>
+
+            {/* Feature Grid */}
+            <section className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-14">
+              <div className="p-6 bg-slate-800 rounded-lg shadow-lg border border-slate-700 min-h-[180px]">
+                <div className="flex items-center mb-4">
+                  <Image
+                    src="/shield-icon.svg"
+                    alt="Contract Review"
+                    width={24}
+                    height={24}
+                    className="mr-2"
+                  />
+                  <h3 className="text-xl font-semibold">Contract Review</h3>
+                </div>
+                <p className="text-slate-300 whitespace-pre-line">
+                  {summary || 'Identify warning signs and potential issues in your contracts.'}
+                </p>
+              </div>
+              <div className="p-6 bg-slate-800 rounded-lg shadow-lg border border-slate-700 min-h-[180px]">
+                <div className="flex items-center mb-4">
+                  <Image
+                    src="/document.svg"
+                    alt="Summarization"
+                    width={24}
+                    height={24}
+                    className="mr-2"
+                  />
+                  <h3 className="text-xl font-semibold">Document Summarization</h3>
+                </div>
+                <p className="text-slate-300 whitespace-pre-line">
+                  {simpleExplanation || 'Get a concise summary of lengthy legal documents.'}
+                </p>
+              </div>
+              <div className="p-6 bg-slate-800 rounded-lg shadow-lg border border-slate-700 min-h-[180px]">
+                <div className="flex items-center mb-4">
+                  <Image
+                    src="/magnifier.svg"
+                    alt="Key Terms"
+                    width={24}
+                    height={24}
+                    className="mr-2"
+                  />
+                  <h3 className="text-xl font-semibold">Key Term Extraction</h3>
+                </div>
+                <p className="text-slate-300 whitespace-pre-line">
+                  {importantClauses.length > 0
+                    ? importantClauses.map((clause, idx) => <div key={idx}>{clause}</div>)
+                    : 'Extract important clauses, dates, parties, and more.'}
+                </p>
+              </div>
+              <div
+                className="p-6 bg-slate-800 rounded-lg shadow-lg border border-slate-700 min-h-[180px] hover:bg-slate-700 cursor-pointer"
+                onClick={() => window.location.href = '/build'}
+              >
+                <div className="flex items-center mb-4">
+                  <Image
+                    src="/Scales.svg"
+                    alt="AI Contract Building"
+                    width={24}
+                    height={24}
+                    className="mr-2"
+                  />
+                  <h3 className="text-xl font-semibold">AI-Powered Contract Building</h3>
+                </div>
+                <p className="text-slate-300">Generate contracts tailored to your needs using AI.</p>
+              </div>
+            </section>
+          </main>
+        )}
       </div>
     </>
   )
