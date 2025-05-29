@@ -68,7 +68,7 @@ export default function Home() {
         />
         <Image
           src="/scales.svg"
-          alt="Scales BG"
+          alt="scales BG"
           width={150}
           height={150}
           className="absolute bottom-0 right-0 opacity-10 hidden md:block"
