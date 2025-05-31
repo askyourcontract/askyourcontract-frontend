@@ -1,34 +1,42 @@
-import { useEffect } from 'react'
-import type { AppProps } from 'next/app'
-import Head from 'next/head'
-import '../styles/globals.css'
+import '@/styles/globals.css';
+import type { AppProps } from 'next/app';
+import { useEffect, useState } from 'react';
+import Head from 'next/head';
 
-export default function MyApp({ Component, pageProps }: AppProps) {
+import { createPagesBrowserClient } from '@supabase/auth-helpers-nextjs';
+import { SessionContextProvider } from '@supabase/auth-helpers-react';
+import { Session } from '@supabase/auth-helpers-nextjs';
+
+export default function MyApp({
+  Component,
+  pageProps,
+}: AppProps<{ initialSession: Session }>) {
+  const [supabaseClient] = useState(() => createPagesBrowserClient());
+
   useEffect(() => {
     const handleRouteChange = (url: string) => {
       if (typeof window !== 'undefined' && (window as any).gtag) {
         (window as any).gtag('config', 'G-LR373JLL8E', {
           page_path: url,
-        })
+        });
       }
-    }
+    };
 
     import('next/router').then(({ Router }) => {
-      Router.events.on('routeChangeComplete', handleRouteChange)
-    })
+      Router.events.on('routeChangeComplete', handleRouteChange);
+    });
 
     return () => {
       import('next/router').then(({ Router }) => {
-        Router.events.off('routeChangeComplete', handleRouteChange)
-      })
-    }
-  }, [])
+        Router.events.off('routeChangeComplete', handleRouteChange);
+      });
+    };
+  }, []);
 
   return (
     <>
       <Head>
         <title>AskYourContract.ai</title>
-        {/* Google Analytics Initialization */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -42,7 +50,13 @@ export default function MyApp({ Component, pageProps }: AppProps) {
           }}
         />
       </Head>
-      <Component {...pageProps} />
+
+      <SessionContextProvider
+        supabaseClient={supabaseClient}
+        initialSession={pageProps.initialSession}
+      >
+        <Component {...pageProps} />
+      </SessionContextProvider>
     </>
-  )
+  );
 }

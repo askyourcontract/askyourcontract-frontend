@@ -1,132 +1,101 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { useState } from 'react';
+import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react';
 
 type AnalysisResult = {
-  summary: string
-  clauses: string[]
-  explanation: string
-}
+  summary: string;
+  clauses: string[];
+  explanation: string;
+};
 
 type Props = {
-  onResults: (result: AnalysisResult) => void
-}
+  onResults: (result: AnalysisResult) => void;
+};
 
 export default function FileUpload({ onResults }: Props) {
-  const [file, setFile] = useState<File | null>(null)
-  const [uploading, setUploading] = useState(false)
-  const [error, setError] = useState<string>('')
+  const supabase = useSupabaseClient();
+  const session = useSession();
+  const userId = session?.user?.id || null;
+
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFile(e.target.files?.[0] || null)
-    setError('')
-  }
+    setSelectedFile(e.target.files?.[0] || null);
+    setError(null);
+  };
 
   const handleUpload = async () => {
-    if (!file) {
-      setError('Please select a file to upload.')
-      return
+    if (!selectedFile || !userId || !session) {
+      setError('Please sign in and select a file.');
+      return;
     }
 
-    setUploading(true)
-    setError('')
+    setUploading(true);
+    setError(null);
 
     try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Date.now()}.${fileExt}`
-      const filePath = `uploads/${fileName}`
+      const fileName = `${Date.now()}_${selectedFile.name}`;
+      const filePath = `${userId}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('documents')
-        .upload(filePath, file)
+        .upload(filePath, selectedFile);
 
-      if (uploadError) throw new Error(uploadError.message)
+      if (uploadError) throw uploadError;
 
-      // Google Analytics event for upload
-      if (typeof window !== 'undefined' && (window as any).gtag) {
-        (window as any).gtag('event', 'file_upload', {
-          event_category: 'Documents',
-          event_label: file.name,
-          value: file.size,
-        })
-      }
-
-      const res = await fetch('/api/analyze', {
+      const response = await fetch('/api/analyze', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
         body: JSON.stringify({ filePath }),
-      })
+      });
 
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Analysis failed')
+      const data = await response.json();
 
-      onResults(data)
-
-      // Google Analytics event for result
-      if (typeof window !== 'undefined' && (window as any).gtag) {
-        (window as any).gtag('event', 'ai_analysis_complete', {
-          event_category: 'Analysis',
-          event_label: file.name,
-        })
+      if (!response.ok) {
+        setError(data.error || 'Unexpected error occurred');
+        return;
       }
 
+      onResults(data);
     } catch (err: any) {
-      setError(err.message || 'Something went wrong')
+      console.error('Upload failed:', err.message);
+      setError(err.message || 'Unexpected error occurred');
     } finally {
-      setUploading(false)
+      setUploading(false);
     }
-  }
+  };
 
   return (
-    <div className="bg-white max-w-2xl mx-auto w-full p-6 sm:p-8 rounded-xl shadow-md mt-6 space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold text-gray-800 mb-2">Upload your legal document</h2>
-        <p className="text-gray-500 text-sm">Supported formats: PDF, DOCX, JPG/PNG</p>
-      </div>
+    <div className="max-w-xl mx-auto mt-10 bg-white dark:bg-gray-900 rounded-lg shadow-md p-6">
+      <h2 className="text-xl font-semibold text-center mb-4 text-gray-900 dark:text-white">
+        Upload your legal document
+      </h2>
+      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 text-center">
+        Supported formats: PDF, DOCX, JPG/PNG
+      </p>
 
       <input
         type="file"
         accept=".pdf,.doc,.docx,image/*"
         onChange={handleFileChange}
-        className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:border file:rounded file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+        className="mb-4"
       />
 
       <button
         onClick={handleUpload}
-        disabled={uploading}
-        className="w-full flex justify-center items-center px-4 py-2 bg-blue-600 text-white font-medium rounded hover:bg-blue-700 transition"
+        disabled={!selectedFile || uploading}
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition duration-300 disabled:opacity-50"
       >
-        {uploading ? (
-          <svg
-            className="animate-spin h-5 w-5 mr-2 text-white"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8v8H4z"
-            />
-          </svg>
-        ) : null}
-        {uploading ? 'Analyzing...' : 'Upload & Analyze'}
+        {uploading ? 'Uploading & Analyzing...' : 'Upload & Analyze'}
       </button>
 
-      {error && (
-        <div className="bg-red-100 text-red-700 text-sm px-4 py-2 rounded">
-          {error}
-        </div>
-      )}
+      {error && <p className="mt-4 text-red-600 text-center">{error}</p>}
     </div>
-  )
+  );
 }
