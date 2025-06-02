@@ -71,7 +71,7 @@ export default function Document() {
           }}
         />
 
-        {/* Google Analytics Async Tag */}
+        {/* Google Analytics (GA4) with page_path tracking */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-LR373JLL8E"></script>
         <script
           dangerouslySetInnerHTML={{
@@ -79,12 +79,14 @@ export default function Document() {
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', 'G-LR373JLL8E');
+              gtag('config', 'G-LR373JLL8E', {
+                page_path: window.location.pathname,
+              });
             `,
           }}
         />
 
-        {/* ✅ Google AdSense Site Verification Snippet */}
+        {/* Google AdSense Verification */}
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6625555515664002"
