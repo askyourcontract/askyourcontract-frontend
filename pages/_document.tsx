@@ -72,10 +72,17 @@ export default function Document() {
         />
 
         {/* Google Analytics Async Tag */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-LR373JLL8E"></script>
         <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-LR373JLL8E"
-        ></script>
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-LR373JLL8E');
+            `,
+          }}
+        />
 
         {/* ✅ Google AdSense Site Verification Snippet */}
         <script
