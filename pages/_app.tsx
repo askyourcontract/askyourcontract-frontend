@@ -9,7 +9,7 @@ import { createPagesBrowserClient } from '@supabase/auth-helpers-nextjs';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import { Session } from '@supabase/auth-helpers-nextjs';
 
-const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID || 'G-LR373JLL8E';
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID || 'G-LR37JLLL8E';
 
 function sendPageView(url: string) {
   if (typeof window !== 'undefined' && (window as any).gtag) {
