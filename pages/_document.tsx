@@ -71,21 +71,7 @@ export default function Document() {
           }}
         />
 
-        {/* Google Analytics (GA4) with page_path tracking */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-LR373JLL8E"></script>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-LR373JLL8E', {
-                page_path: window.location.pathname,
-              });
-            `,
-          }}
-        />
-
+        {/* REMOVE ALL GOOGLE ANALYTICS CODE FROM THIS FILE */}
         {/* Google AdSense Verification */}
         <script
           async

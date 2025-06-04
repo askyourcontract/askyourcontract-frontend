@@ -1,13 +1,16 @@
 // next.config.js
 
 const nextConfig = {
-  compress: true, // Enables Gzip compression for JS and CSS
+  compress: true,
   reactStrictMode: true,
+  env: {
+    NEXT_PUBLIC_GA_ID: process.env.NEXT_PUBLIC_GA_ID, // ← Add this
+  },
   api: {
     bodyParser: {
-      sizeLimit: '20mb', // or higher if needed
+      sizeLimit: '20mb',
     },
-  },
+  }
 }
 
 module.exports = nextConfig
